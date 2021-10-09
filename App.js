@@ -1,111 +1,108 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- * @flow strict-local
- */
-
-import React from 'react';
-import type {Node} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   SafeAreaView,
-  ScrollView,
   StatusBar,
-  StyleSheet,
-  Text,
-  useColorScheme,
   View,
+  Text,
+  StyleSheet,
+  Alert,
+  ActivityIndicator,
 } from 'react-native';
+import {requestPermission} from './src/utils/Permission';
+import {getDataForJSONExport} from './src/utils/ExportJSON';
+import SMSStatsModal from './src/components/SMSStatsModal';
+import CustomButton from './src/components/CustomButton';
+import Footer from './src/components/Footer';
 
-import {
-  Colors,
-  DebugInstructions,
-  Header,
-  LearnMoreLinks,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
+const App = () => {
+  const [isLoading, setIsLoading] = useState(false);
+  const [SMSStats, setSMSStats] = useState(null);
+  useEffect(() => {
+    requestPermission();
+  }, []);
 
-const Section = ({children, title}): Node => {
-  const isDarkMode = useColorScheme() === 'dark';
-  return (
-    <View style={styles.sectionContainer}>
-      <Text
-        style={[
-          styles.sectionTitle,
-          {
-            color: isDarkMode ? Colors.white : Colors.black,
-          },
-        ]}>
-        {title}
-      </Text>
-      <Text
-        style={[
-          styles.sectionDescription,
-          {
-            color: isDarkMode ? Colors.light : Colors.dark,
-          },
-        ]}>
-        {children}
-      </Text>
-    </View>
-  );
-};
+  const handleJSONClicked = async () => {
+    try {
+      setIsLoading(true);
+      const stats = await getDataForJSONExport();
+      setSMSStats(stats);
+    } catch (e) {
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-const App: () => Node = () => {
-  const isDarkMode = useColorScheme() === 'dark';
-
-  const backgroundStyle = {
-    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
+  const handleXMLClicked = async () => {
+    Alert.alert('Error', 'XML export not yet implemented');
   };
 
   return (
-    <SafeAreaView style={backgroundStyle}>
-      <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        style={backgroundStyle}>
-        <Header />
-        <View
-          style={{
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
-          }}>
-          <Section title="Step One">
-            Edit <Text style={styles.highlight}>App.js</Text> to change this
-            screen and then come back to see your edits.
-          </Section>
-          <Section title="See Your Changes">
-            <ReloadInstructions />
-          </Section>
-          <Section title="Debug">
-            <DebugInstructions />
-          </Section>
-          <Section title="Learn More">
-            Read the docs to discover what to do next:
-          </Section>
-          <LearnMoreLinks />
-        </View>
-      </ScrollView>
+    <SafeAreaView style={styles.appContainer}>
+      <StatusBar barStyle={'dark-content'} />
+      <View style={styles.titleView}>
+        <Text style={styles.titleText}>Export your SMS</Text>
+      </View>
+      <View style={styles.textView}>
+        <Text style={styles.textText}>Choose the format you want</Text>
+      </View>
+      <View style={styles.exportFormatsView}>
+        {isLoading === true ? (
+          <ActivityIndicator size="large" />
+        ) : (
+          <>
+            <CustomButton title={'JSON'} onPress={handleJSONClicked} />
+            <CustomButton title={'XML'} onPress={handleXMLClicked} />
+          </>
+        )}
+      </View>
+
+      <Footer />
+
+      {SMSStats !== null ? (
+        <SMSStatsModal
+          SMSStats={SMSStats}
+          onClose={() => {
+            setSMSStats(null);
+          }}
+        />
+      ) : null}
     </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
+  appContainer: {
+    flex: 1,
+    padding: '5%',
+    backgroundColor: '#444444',
   },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
+  titleView: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  sectionDescription: {
+  titleText: {
+    marginTop: '5%',
+    fontSize: 18,
+    fontWeight: '700',
+    color: 'lightblue',
+  },
+  textView: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  textText: {
     marginTop: 8,
     fontSize: 18,
     fontWeight: '400',
+    color: 'lightblue',
   },
-  highlight: {
-    fontWeight: '700',
+  exportFormatsView: {
+    flex: 2,
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'center',
   },
 });
 
