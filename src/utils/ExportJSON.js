@@ -2,13 +2,23 @@ import SmsAndroid from 'react-native-get-sms-android';
 import {Alert} from 'react-native';
 import Contacts from 'react-native-contacts';
 
-const filter = {
-  box: 'inbox',
-  maxDate: Date.now(),
-};
+/**
+ * SEE THE END OF THE FILE FOR THE FORMATS OF THE DATA RETURNED BY THE LIBRARIES
+ */
 
+/**
+ * Get all the SMS on the phone, including the name of the corresponding contact
+ * 1. Fetch all the SMS
+ * 2. Fetch all the contacts
+ * 3. For each SMS, find the corresponding contact, based on the the phone number
+ */
 export const getDataForJSONExport = () =>
   new Promise((resolve, reject) => {
+    // 1. Fetch all the SMS
+    const filter = {
+      box: 'inbox',
+      maxDate: Date.now(),
+    };
     SmsAndroid.list(
       JSON.stringify(filter),
       fail => {
@@ -25,26 +35,37 @@ export const getDataForJSONExport = () =>
         };
 
         const allSMS = JSON.parse(smsList);
+
+        // 2. Fetch all the contacts
         const allContacts = await Contacts.getAllWithoutPhotos();
-        const reducedAllSMS = [];
+
+        // 3. For each SMS, find the corresponding contact, based on the the phone number
+        // Each contact can have multiple phone numbers, so we check them all
+        const allSMSWithCorrespondingContactName = [];
         allSMS.forEach(sms => {
           const contactOfSMS = allContacts.find(
             contact =>
               contact &&
-              contact.phoneNumbers[0] &&
-              contact.phoneNumbers[0].number === sms.address,
+              contact.phoneNumbers &&
+              contact.phoneNumbers
+                .map(phoneNumber => phoneNumber.number.slice(-9)) // ugly trick for now to handle the same numbers but with or without the international code
+                .includes(sms.address.slice(-9)),
           );
-          if (contactOfSMS !== undefined) {
-            reducedAllSMS.push({
-              contact: `${contactOfSMS.givenName} ${contactOfSMS.familyName}`,
-              person: sms.person,
-              date: new Date(sms.date),
-              body: sms.body,
-              service_center: sms.service_center,
-            });
-          }
+
+          allSMSWithCorrespondingContactName.push({
+            ...sms,
+            contact:
+              contactOfSMS !== undefined
+                ? `${contactOfSMS.givenName} ${contactOfSMS.familyName}`
+                : sms.address,
+            date: new Date(sms.date).toJSON(), // format the date as a JSON string
+          });
         });
-        const conversations = groupBy(reducedAllSMS, 'contact');
+
+        const conversations = groupBy(
+          allSMSWithCorrespondingContactName,
+          'contact',
+        );
 
         resolve({
           SMSCount: count,

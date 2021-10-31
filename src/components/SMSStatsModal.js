@@ -10,7 +10,7 @@ import {
 import RNFetchBlob from 'rn-fetch-blob';
 import CustomButton from './CustomButton';
 
-const fileName = `/SMS_backup_timestamp_${Date.now()}.json`;
+const fileName = `/ExportSMS_backup_${new Date().toJSON()}.json`;
 
 const SMSStatsModal = props => {
   const {onClose, SMSStats} = props;
@@ -31,7 +31,10 @@ const SMSStatsModal = props => {
           'utf8',
         )
           .then(() => {
-            Alert.alert('File written', 'Path:\n' + NEW_FILE_PATH);
+            Alert.alert(
+              'File written',
+              `Path:\n ${NEW_FILE_PATH}\n\n It should correspond to your "Download" directory.`,
+            );
           })
           .catch(e => {
             Alert.alert('Error', 'File could not ne written' + e);
@@ -44,6 +47,8 @@ const SMSStatsModal = props => {
       }
     } catch (err) {
       console.warn(err);
+    } finally {
+      onClose();
     }
   };
 
