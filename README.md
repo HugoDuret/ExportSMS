@@ -1,14 +1,13 @@
 # ExportSMS
 React-native app (Android and iOS) to view SMS stored on the phone, and easily export them to standard data exchange formats (JSON and XML).
 
-# Screenshots (v1.0.0 - Current)
-
 
 ## Why this app?
 A few weeks ago, I searched for a way to create a backup for my SMS. And I have found nothing worth of interest. I couldn't to it natively with my Android phone. My mobile services provider was charging a fee for it. And some apps on the store let you do it for free, but I have no idea what they are doing once I give them access to my contacts, SMS, storage, etc...
 I just want do make a backup of my SMS, for free, without giving away my privacy. We're in 2021 godammn it: it should be made easy by now! So here we go, I put my react-native's knowledge to good use, to create this free, ad-free, privacy respecting, open-source mobile app.
 The aim is to make an app easy to use, and going straight to the point.
 
+## Screenshots (v1.0.0 - Current)
 <div style="display: flex;">
   <img src="https://user-images.githubusercontent.com/44072355/140552643-13c1706a-4ca3-4d55-9ffa-b9c49c6d8236.png" alt="Choose an export format" width="200"/>
   <img src="https://user-images.githubusercontent.com/44072355/140552676-55bcd626-c95e-454b-9c87-345ee9bf1e28.png" alt="See stats and write file" width="200"/>
